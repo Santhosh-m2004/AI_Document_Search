@@ -26,16 +26,13 @@ class AIService {
         ? `Based on the following context: ${context}\n\nAnswer this question: ${prompt}`
         : `Please answer this question: ${prompt}`;
 
-      // Try a different model that's more likely to work
-      const model = "microsoft/DialoGPT-large";
+      // Use a model that's specifically designed for question answering
+      const model = "deepset/roberta-base-squad2"; // Question answering model
       
       const data = JSON.stringify({
-        inputs: fullPrompt,
-        parameters: {
-          max_length: 300,
-          temperature: 0.7,
-          top_p: 0.9,
-          return_full_text: false
+        inputs: {
+          question: prompt,
+          context: context || "This is a document uploaded by the user. Please provide helpful information based on its content."
         }
       });
 
@@ -46,7 +43,7 @@ class AIService {
         headers: {
           'Authorization': `Bearer ${this.apiToken}`,
           'Content-Type': 'application/json',
-          'Content-Length': data.length
+          'Content-Length': Buffer.byteLength(data)
         },
         timeout: 15000
       };
@@ -61,16 +58,17 @@ class AIService {
         res.on('end', () => {
           try {
             if (res.statusCode !== 200) {
+              console.error('API error:', res.statusCode, responseData);
               reject(new Error(`HTTP ${res.statusCode}: ${responseData}`));
               return;
             }
 
             const result = JSON.parse(responseData);
             
-            if (Array.isArray(result) && result.length > 0) {
-              resolve(result[0].generated_text || "");
-            } else if (result.generated_text) {
-              resolve(result.generated_text);
+            if (result.answer) {
+              resolve(result.answer);
+            } else if (result.error) {
+              reject(new Error(result.error));
             } else {
               reject(new Error('Unexpected response format'));
             }
@@ -105,7 +103,10 @@ class AIService {
     } else if (lowerPrompt.includes('what') && lowerPrompt.includes('this') && lowerPrompt.includes('about')) {
       return "This appears to be a document you've uploaded. I can help answer questions about its content.";
     } else if (context) {
-      return "Based on your document, I can see this is related to the content you uploaded. Could you ask a more specific question?";
+      // Try to extract some key information from the context
+      const sentences = context.split('.');
+      const preview = sentences.slice(0, 2).join('.') + (sentences.length > 2 ? '...' : '');
+      return `Based on your document, I can see this is about: ${preview} Could you ask a more specific question about this content?`;
     } else {
       return "I'm here to help you with questions about your uploaded documents. Please try asking something specific about your PDF content.";
     }

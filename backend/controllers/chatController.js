@@ -40,9 +40,9 @@ const chatWithPDF = async (req, res) => {
     });
   } catch (error) {
     console.error('Chat error:', error);
-    // Provide a friendly error message
+    // Provide a more specific error message
     res.json({
-      response: "I'm currently experiencing technical difficulties. Please try again later.",
+      response: "I'm having trouble processing your request right now. Please try again in a moment.",
       chatId: null
     });
   }
