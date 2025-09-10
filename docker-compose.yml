@@ -1,0 +1,29 @@
+services:
+  backend:
+    build: ./backend
+    container_name: ai-pdf-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb+srv://dbUser:Santu%4012345@cluster0.75o1h.mongodb.net/chatbot?retryWrites=true&w=majority&appName=Cluster0
+      - HUGGING_FACE_API_TOKEN=${HUGGING_FACE_API_TOKEN}
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: ai-pdf-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+networks:
+  ai-network:
+    driver: bridge
