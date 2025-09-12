@@ -16,6 +16,10 @@ const documentSchema = new mongoose.Schema({
   uploadedAt: {
     type: Date,
     default: Date.now
+  },
+  sessionId: {
+    type: String,
+    required: true
   }
 });
 

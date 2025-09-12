@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import MessageList from './MessageList'
 import { sendMessage } from '../services/api'
 
-const ChatInterface = ({ chatId, setChatId, messages, setMessages }) => {
+const ChatInterface = ({ chatId, setChatId, messages, setMessages, sessionId, pdfName }) => {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef(null)
@@ -17,7 +17,7 @@ const ChatInterface = ({ chatId, setChatId, messages, setMessages }) => {
 
   const handleSend = async (e) => {
     e.preventDefault()
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || isLoading || !sessionId) return
 
     const userMessage = { role: 'user', content: input }
     const newMessages = [...messages, userMessage]
@@ -26,7 +26,7 @@ const ChatInterface = ({ chatId, setChatId, messages, setMessages }) => {
     setIsLoading(true)
 
     try {
-      const response = await sendMessage(input, chatId)
+      const response = await sendMessage(input, chatId, sessionId)
       setMessages([...newMessages, { role: 'assistant', content: response.response }])
       setChatId(response.chatId)
     } catch (error) {
@@ -42,6 +42,22 @@ const ChatInterface = ({ chatId, setChatId, messages, setMessages }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 h-[600px] flex flex-col">
+      {pdfName && (
+        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-700">
+            <span className="font-semibold">Current PDF:</span> {pdfName}
+          </p>
+        </div>
+      )}
+      
+      {!sessionId && (
+        <div className="mb-4 p-3 bg-yellow-50 rounded-lg">
+          <p className="text-sm text-yellow-700">
+            Please upload a PDF first to start chatting about it.
+          </p>
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto mb-4">
         <MessageList messages={messages} />
         {isLoading && (
@@ -63,13 +79,13 @@ const ChatInterface = ({ chatId, setChatId, messages, setMessages }) => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question about your PDF..."
+          placeholder={sessionId ? "Ask a question about your PDF..." : "Upload a PDF first to ask questions"}
           className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={isLoading}
+          disabled={isLoading || !sessionId}
         />
         <button
           type="submit"
-          disabled={isLoading || !input.trim()}
+          disabled={isLoading || !input.trim() || !sessionId}
           className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Send

@@ -12,6 +12,16 @@ A Retrieval-Augmented Generation (RAG) chatbot that allows you to chat with your
 - MongoDB for data storage
 - Docker containerization
 
+## Screenshots
+
+### Upload PDF
+![Upload PDF](assets/Pdf uploading.png)
+
+### Chat with Document
+![Chat with Document](assets/Chatting.png)
+
+![Chat with Document](assets/Chatting2.png)
+
 ## Prerequisites
 
 - Node.js (v18 or higher)
@@ -21,7 +31,7 @@ A Retrieval-Augmented Generation (RAG) chatbot that allows you to chat with your
 ## Setup
 
 1. Clone the repository
-2. Copy `.env.example` to `.env` and configure your environment variables
+2. Copy `.env` and configure your environment variables
 3. Set your Gemini AI API key in the `.env` file
 4. Run `docker-compose up -d` to start all services
 

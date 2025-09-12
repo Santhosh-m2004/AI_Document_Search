@@ -9,14 +9,14 @@ dotenv.config();
 // Import routes
 const uploadRoutes = require('./routes/upload');
 const chatRoutes = require('./routes/chat');
-
+const sessionRoutes = require('./routes/session');
 const app = express();
 
 // Middleware - increase limits for file uploads
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
+app.use('/api/session', sessionRoutes);
 // Routes
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chat', chatRoutes);

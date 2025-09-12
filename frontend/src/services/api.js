@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const API_BASE_URL = '/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,8 +9,8 @@ const api = axios.create({
   },
 })
 
-export const sendMessage = async (message, chatId) => {
-  const response = await api.post('/chat', { message, chatId })
+export const sendMessage = async (message, chatId, sessionId) => {
+  const response = await api.post('/chat', { message, chatId, sessionId })
   return response.data
 }
 
@@ -25,6 +25,11 @@ export const uploadPDF = async (formData) => {
 
 export const getChatHistory = async (chatId) => {
   const response = await api.get(`/chat/${chatId}`)
+  return response.data
+}
+
+export const clearSession = async (sessionId) => {
+  const response = await api.post('/session/clear', { sessionId })
   return response.data
 }
 

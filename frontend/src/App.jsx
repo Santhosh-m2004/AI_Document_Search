@@ -7,15 +7,19 @@ function App() {
   const [activeTab, setActiveTab] = useState('chat')
   const [chatId, setChatId] = useState(null)
   const [messages, setMessages] = useState([])
+  const [sessionId, setSessionId] = useState(null)
+  const [pdfName, setPdfName] = useState(null)
 
-  // Load chat history from localStorage on component mount
+  // Load state from localStorage on component mount
   useEffect(() => {
+    const savedSessionId = localStorage.getItem('currentSessionId')
+    const savedPdfName = localStorage.getItem('currentPdfName')
     const savedChatId = localStorage.getItem('currentChatId')
     const savedMessages = localStorage.getItem('chatMessages')
     
-    if (savedChatId) {
-      setChatId(savedChatId)
-    }
+    if (savedSessionId) setSessionId(savedSessionId)
+    if (savedPdfName) setPdfName(savedPdfName)
+    if (savedChatId) setChatId(savedChatId)
     
     if (savedMessages) {
       try {
@@ -26,19 +30,59 @@ function App() {
     }
   }, [])
 
-  // Save chat state to localStorage whenever it changes
+  // Save state to localStorage whenever it changes
   useEffect(() => {
+    if (sessionId) {
+      localStorage.setItem('currentSessionId', sessionId)
+    }
+    if (pdfName) {
+      localStorage.setItem('currentPdfName', pdfName)
+    }
     if (chatId) {
       localStorage.setItem('currentChatId', chatId)
     }
     localStorage.setItem('chatMessages', JSON.stringify(messages))
-  }, [chatId, messages])
+  }, [sessionId, pdfName, chatId, messages])
 
-  const clearChat = () => {
+  const clearChat = async () => {
+    try {
+      if (sessionId) {
+        // Call API to clear session
+        const response = await fetch('/api/session/clear', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        if (response.ok) {
+          console.log('Session cleared successfully');
+        }
+      }
+      
+      // Clear local state
+      setSessionId(null)
+      setPdfName(null)
+      setChatId(null)
+      setMessages([])
+      
+      // Clear localStorage
+      localStorage.removeItem('currentSessionId')
+      localStorage.removeItem('currentPdfName')
+      localStorage.removeItem('currentChatId')
+      localStorage.removeItem('chatMessages')
+    } catch (error) {
+      console.error('Error clearing chat:', error)
+    }
+  }
+
+  const handleUploadSuccess = (data) => {
+    setSessionId(data.sessionId)
+    setPdfName(data.filename)
     setChatId(null)
     setMessages([])
-    localStorage.removeItem('currentChatId')
-    localStorage.removeItem('chatMessages')
+    setActiveTab('chat')
   }
 
   return (
@@ -68,7 +112,7 @@ function App() {
               >
                 Upload PDF
               </button>
-              {activeTab === 'chat' && messages.length > 0 && (
+              {activeTab === 'chat' && (pdfName || messages.length > 0) && (
                 <button
                   onClick={clearChat}
                   className="px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-100"
@@ -88,9 +132,11 @@ function App() {
             setChatId={setChatId}
             messages={messages}
             setMessages={setMessages}
+            sessionId={sessionId}
+            pdfName={pdfName}
           />
         ) : (
-          <FileUpload />
+          <FileUpload onUploadSuccess={handleUploadSuccess} />
         )}
       </main>
     </div>

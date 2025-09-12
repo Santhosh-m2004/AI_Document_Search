@@ -3,7 +3,7 @@ const PDFProcessor = require('./pdfProcessor');
 const GeminiService = require('./geminiService'); // Changed from AIService to GeminiService
 
 class VectorStoreService {
-  async storeDocument(filename, buffer) {
+  async storeDocument(filename, buffer, sessionId) {
     try {
       // Extract text from PDF
       const text = await PDFProcessor.extractText(buffer);
@@ -21,6 +21,7 @@ class VectorStoreService {
           filename,
           content: chunk,
           embedding,
+          sessionId,
           uploadedAt: new Date()
         });
       }
@@ -35,15 +36,14 @@ class VectorStoreService {
     }
   }
 
-  async findRelevantChunks(query, limit = 5) {
+  async findRelevantChunks(query,sessionId, limit = 5) {
     try {
       // Generate embedding for the query
       const queryEmbedding = await GeminiService.generateEmbedding(query);
-      
+       const sessionDocuments = await Document.find({ sessionId });
       // Find similar documents using cosine similarity
-      const allDocuments = await Document.find({});
       
-      const scoredDocuments = allDocuments.map(doc => {
+     const scoredDocuments = sessionDocuments.map(doc => {
         const similarity = this.cosineSimilarity(queryEmbedding, doc.embedding);
         return { ...doc.toObject(), similarity };
       });
@@ -57,6 +57,15 @@ class VectorStoreService {
       console.error('Error finding relevant chunks:', error);
       // Return empty array instead of failing
       return [];
+    }
+  }
+  async clearSessionDocuments(sessionId) {
+    try {
+      await Document.deleteMany({ sessionId });
+      return true;
+    } catch (error) {
+      console.error('Error clearing session documents:', error);
+      return false;
     }
   }
 

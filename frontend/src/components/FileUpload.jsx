@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { uploadPDF } from '../services/api'
 
-const FileUpload = () => {
+const FileUpload = ({ onUploadSuccess }) => {
   const [file, setFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
   const [message, setMessage] = useState('')
@@ -25,6 +25,14 @@ const FileUpload = () => {
       const response = await uploadPDF(formData)
       setMessage(`File uploaded successfully! Processed ${response.chunks} chunks.`)
       setFile(null)
+      
+      // Call the success callback with upload data
+      if (onUploadSuccess) {
+        onUploadSuccess({
+          filename: response.filename,
+          sessionId: response.sessionId
+        })
+      }
     } catch (error) {
       console.error('Upload error:', error)
       setMessage('Error uploading file. Please try again.')
@@ -53,8 +61,8 @@ const FileUpload = () => {
 
         {file && (
           <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Selected file: ${file.name}</p>
-            <p className="text-xs text-gray-500 mt-1">Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            <p className="text-sm text-gray-600">Selected file: {file.name}</p>
+            <p className="text-xs text-gray-500 mt-1">Size: {(file.size / 1024 / 1024).toFixed(2)} MB</p>
           </div>
         )}
 
@@ -84,6 +92,7 @@ const FileUpload = () => {
           <li>The system will extract and process the text content</li>
           <li>Switch to the Chat tab to ask questions about your document</li>
           <li>The AI will use the content of your PDF to answer questions</li>
+          <li>Use "Clear Chat" to remove the current PDF and start over</li>
         </ul>
       </div>
     </div>
