@@ -1,6 +1,6 @@
 const Chat = require('../models/Chat');
 const VectorStoreService = require('../services/vectorStoreService');
-const AIService = require('../services/aiService');
+const GeminiService = require('../services/geminiService'); // Changed from AIService to GeminiService
 
 const chatWithPDF = async (req, res) => {
   try {
@@ -14,8 +14,8 @@ const chatWithPDF = async (req, res) => {
     const relevantChunks = await VectorStoreService.findRelevantChunks(message);
     const context = relevantChunks.join('\n\n');
 
-    // Generate response using AI service
-    const response = await AIService.generateResponse(message, context);
+    // Generate response using Gemini AI
+    const response = await GeminiService.generateResponse(message, context);
 
     // Save to database
     let chat;
@@ -40,9 +40,9 @@ const chatWithPDF = async (req, res) => {
     });
   } catch (error) {
     console.error('Chat error:', error);
-    // Provide a more specific error message
+    // Provide a friendly error message
     res.json({
-      response: "I'm having trouble processing your request right now. Please try again in a moment.",
+      response: "I'm currently experiencing technical difficulties. Please try again later.",
       chatId: null
     });
   }

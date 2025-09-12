@@ -1,6 +1,6 @@
 const Document = require('../models/Document');
 const PDFProcessor = require('./pdfProcessor');
-const AIService = require('./aiService'); // Changed from HuggingFaceService to AIService
+const GeminiService = require('./geminiService'); // Changed from AIService to GeminiService
 
 class VectorStoreService {
   async storeDocument(filename, buffer) {
@@ -15,7 +15,7 @@ class VectorStoreService {
       const documents = [];
       
       for (const chunk of chunks) {
-        const embedding = await AIService.generateEmbedding(chunk); // Changed to AIService
+        const embedding = await GeminiService.generateEmbedding(chunk);
         
         documents.push({
           filename,
@@ -38,7 +38,7 @@ class VectorStoreService {
   async findRelevantChunks(query, limit = 5) {
     try {
       // Generate embedding for the query
-      const queryEmbedding = await AIService.generateEmbedding(query); // Changed to AIService
+      const queryEmbedding = await GeminiService.generateEmbedding(query);
       
       // Find similar documents using cosine similarity
       const allDocuments = await Document.find({});
