@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = '/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.PROD ? 'https://ai-pdf-backend.onrender.com/api' : '/api')
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,6 +9,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 })
+
 
 export const sendMessage = async (message, chatId, sessionId) => {
   const response = await api.post('/chat', { message, chatId, sessionId })

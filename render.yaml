@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: ai-pdf-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        fromSecret: MONGODB_URI
+      - key: GEMINI_API_KEY
+        fromSecret: GEMINI_API_KEY
+      - key: JWT_SECRET
+        fromSecret: JWT_SECRET
+      - key: PORT
+        value: 10000
