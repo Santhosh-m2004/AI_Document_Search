@@ -15,7 +15,7 @@ A Retrieval-Augmented Generation (RAG) chatbot that allows you to chat with your
 ## Screenshots
 
 ### Upload PDF
-![Upload PDF](assets/PdfUploading.png)
+![Pdf Uploader](assets/PdfUploading%20.png)
 
 ### Chat with Document
 ![Chat with Document](assets/Chatting.png)
